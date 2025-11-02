@@ -1,23 +1,26 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope } from 'lucide-react';
+import { CalendarPlus, FileText, MapPin } from 'lucide-react';
 
 const features = [
   {
-    title: 'Easy Booking',
+    title: 'Schedule a Test',
     description: 'Schedule lab tests with just a few clicks, anytime, anywhere.',
-    imageId: 'easy-booking',
+    icon: CalendarPlus,
+    href: '/schedule',
   },
   {
-    title: 'Quick Results',
+    title: 'View Your Results',
     description: 'Access comprehensive test results securely online within hours.',
-    imageId: 'quick-results',
+    icon: FileText,
+    href: '/results',
   },
   {
-    title: 'Privacy First',
-    description: 'Your data is encrypted and protected with bank-level security.',
-    imageId: 'privacy-first',
+    title: 'Find a Lab',
+    description: 'Locate a convenient testing center near you from our extensive network.',
+    icon: MapPin,
+    href: '#',
   },
 ];
 
@@ -37,21 +40,20 @@ export default function FeaturesSection() {
         </div>
         <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:max-w-none lg:grid-cols-3">
           {features.map((feature) => {
+            const Icon = feature.icon;
             return (
               <Card key={feature.title} className="h-full transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2">
-                    <Stethoscope className="h-6 w-6 text-primary" />
+                    <Icon className="h-6 w-6 text-primary" />
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col h-full">
                   <p className="flex-grow text-foreground/80">{feature.description}</p>
-                  {feature.title !== 'Privacy First' && (
-                    <Button variant="link" asChild className="mt-4 self-start pl-0 text-accent-foreground/90">
-                      <Link href="#">LEARN MORE →</Link>
-                    </Button>
-                  )}
+                  <Button variant="link" asChild className="mt-4 self-start pl-0 text-accent-foreground/90">
+                      <Link href={feature.href}>LEARN MORE →</Link>
+                  </Button>
                 </CardContent>
               </Card>
             );
