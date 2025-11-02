@@ -3,27 +3,20 @@ import { Button } from '@/components/ui/button';
 
 export default function HeroSection() {
   return (
-    <section className="w-full py-20 md:py-32 lg:py-40 bg-card">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="grid gap-6 lg:grid-cols-1 lg:gap-12 xl:grid-cols-1">
-          <div className="flex flex-col justify-center space-y-6 text-center">
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-primary">
-                Ready to Take Charge of Your Health?
-              </h1>
-              <p className="mx-auto max-w-[700px] text-lg text-foreground/80 md:text-xl">
-                Trusted lab, accurate & timely results, supporting your health journey.
-              </p>
-            </div>
-            <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link href="/auth/signin">Book a test</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="#about">Learn more</Link>
-              </Button>
-            </div>
-          </div>
+    <section className="relative w-full h-screen bg-cover bg-center flex items-center text-white" style={{backgroundImage: "url('/images/lab-sign-in.jpg')"}}>
+      <div className="absolute inset-0 bg-black/50"></div>
+      <div className="relative max-w-[1500px] px-6 mx-auto w-full flex flex-col lg:items-start items-center text-center lg:text-left">
+        <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-3xl drop-shadow-lg">
+          Test anywhere with, <br />
+          <span className="text-primary ">Lab Link</span>
+        </h1>
+        <div className="flex space-x-4">
+          <Button asChild size="lg">
+            <Link href="/auth/signin">Book a Test</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="text-black">
+            <Link href="/about">Learn more</Link>
+          </Button>
         </div>
       </div>
     </section>

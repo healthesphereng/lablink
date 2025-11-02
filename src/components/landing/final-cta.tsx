@@ -1,14 +1,11 @@
-import Link from 'next/link';
-import { Stethoscope, Mail, ArrowRight } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Mail, ArrowRight } from "lucide-react";
+import { Input } from "../ui/input";
 
-export default function NewsletterFooter() {
+export default function FinalCTA() {
   return (
-    <footer id="contact" className="w-full bg-background">
-      <div className="container mx-auto px-4 md:px-6">
-        <div id="newsletter" className="py-12 md:py-16 lg:py-20 text-center">
-        <section className="py-12 md:py-20 bg-gradient-to-b from-white to-blue-50">
+    <section className="py-12 md:py-20 bg-gradient-to-b from-white to-blue-50">
       <div className="container px-4 mx-auto">
         <div className="rounded-xl border bg-card text-card-foreground mx-auto shadow-md hover:shadow-xl transition-shadow duration-300">
           <div className="p-6 md:p-12">
@@ -65,8 +62,5 @@ export default function NewsletterFooter() {
         </div>
       </div>
     </section>
-        </div>
-      </div>
-    </footer>
   );
 }
