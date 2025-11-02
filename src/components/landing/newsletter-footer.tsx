@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function NewsletterFooter() {
   return (
-    <footer id="contact" className="w-full bg-primary/5">
+    <footer id="contact" className="w-full bg-background">
       <div className="container mx-auto px-4 md:px-6">
         <div id="newsletter" className="py-12 md:py-16 lg:py-20 text-center">
           <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl text-primary">
@@ -18,7 +18,7 @@ export default function NewsletterFooter() {
               className="flex-1 rounded-r-none focus:ring-accent"
               aria-label="Email for newsletter"
             />
-            <Button type="submit" className="rounded-l-none bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button type="submit" className="rounded-l-none bg-primary hover:bg-primary/90 text-primary-foreground">
               Subscribe →
             </Button>
           </form>
