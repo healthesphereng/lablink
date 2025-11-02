@@ -1,8 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Stethoscope } from 'lucide-react';
 
 const features = [
   {
@@ -23,8 +22,6 @@ const features = [
 ];
 
 export default function FeaturesSection() {
-  const getImage = (id: string) => PlaceHolderImages.find((img) => img.id === id);
-
   return (
     <section id="about" className="w-full py-12 md:py-24 lg:py-32">
       <div className="container mx-auto px-4 md:px-6">
@@ -40,21 +37,13 @@ export default function FeaturesSection() {
         </div>
         <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:max-w-none lg:grid-cols-3">
           {features.map((feature) => {
-            const image = getImage(feature.imageId);
             return (
               <Card key={feature.title} className="h-full transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
                 <CardHeader>
-                  {image && (
-                    <Image
-                      src={image.imageUrl}
-                      alt={feature.title}
-                      width={600}
-                      height={400}
-                      className="mb-4 rounded-lg object-cover"
-                      data-ai-hint={image.imageHint}
-                    />
-                  )}
-                  <CardTitle className="font-headline">{feature.title}</CardTitle>
+                  <CardTitle className="font-headline flex items-center gap-2">
+                    <Stethoscope className="h-6 w-6 text-primary" />
+                    {feature.title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col h-full">
                   <p className="flex-grow text-foreground/80">{feature.description}</p>
