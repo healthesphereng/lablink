@@ -1,118 +1,117 @@
-
 'use client';
 
-import { ArrowLeft, CalendarDays } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useFirebase, useUser } from '@/firebase/provider';
+import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { Booking } from '@/types';
+import { Calendar, Clock, MapPin, Beaker, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
 
 export default function AppointmentsPage() {
-  const router = useRouter();
+  const { firestore } = useFirebase();
+  const { user } = useUser();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchBookings() {
+      if (!firestore || !user) return;
+
+      try {
+        const bookingsRef = collection(firestore, 'bookings');
+        const q = query(
+          bookingsRef,
+          where('userId', '==', user.uid),
+          orderBy('date', 'desc')
+        );
+
+        const snapshot = await getDocs(q);
+        const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+        setBookings(fetchedBookings);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBookings();
+  }, [firestore, user]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <div className="flex items-center space-x-2 sm:space-x-4 mb-2">
-            <button
-              onClick={() => router.back()}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-700" />
-            </button>
-            <h1 className="text-2xl font-semibold text-gray-800">
-              My Appointments
-            </h1>
-          </div>
-          <p className="text-gray-600 mt-1 ml-10 sm:ml-12">
-            Track and manage your lab appointments
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 self-end sm:self-auto">
-          <Button variant="outline">
-            <CalendarDays className="mr-2 h-4 w-4" />
-            New Appointment
+    <div className="max-w-5xl mx-auto p-4">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">My Appointments</h1>
+
+      {bookings.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-md p-10 text-center">
+          <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No Appointments Yet</h2>
+          <p className="text-gray-500 mb-6">You haven't scheduled any lab tests yet.</p>
+          <Button asChild>
+            <a href="/find-a-lab">Book a Test</a>
           </Button>
         </div>
-      </header>
+      ) : (
+        <div className="space-y-4">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-blue-600">
+              <div className="p-6 flex flex-col md:flex-row justify-between gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-gray-900">{booking.testName}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                      ${booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        booking.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                          'bg-green-100 text-green-800'}`}>
+                      {booking.status.replace('_', ' ')}
+                    </span>
+                  </div>
 
-      <Tabs defaultValue="pending" className="space-y-6">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 h-auto">
-          <TabsTrigger value="pending" className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-            Pending
-          </TabsTrigger>
-          <TabsTrigger value="confirmed" className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-400"></div>
-            Confirmed
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-            Completed
-          </TabsTrigger>
-          <TabsTrigger value="canceled" className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-400"></div>
-            Canceled
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="pending" className="mt-6">
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <div className="text-gray-400 mb-4">
-              <CalendarDays className="mx-auto h-12 w-12" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900">
-              No pending appointments
-            </h3>
-            <p className="text-gray-600 mt-2">
-              When you schedule appointments, they'll appear here.
-            </p>
-          </div>
-        </TabsContent>
-        <TabsContent value="confirmed" className="mt-6">
-             <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <div className="text-gray-400 mb-4">
-                <CalendarDays className="mx-auto h-12 w-12" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span>{booking.labName}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>{format(booking.date.toDate(), 'MMMM d, yyyy')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Clock className="h-4 w-4" />
+                      <span>{format(booking.date.toDate(), 'h:mm a')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Beaker className="h-4 w-4" />
+                      <span>₦{booking.price.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                No confirmed appointments
-                </h3>
-                <p className="text-gray-600 mt-2">
-                Your confirmed appointments will be displayed here.
-                </p>
-            </div>
-        </TabsContent>
-        <TabsContent value="completed" className="mt-6">
-             <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <div className="text-gray-400 mb-4">
-                <CalendarDays className="mx-auto h-12 w-12" />
+
+                <div className="flex flex-col justify-center gap-2 min-w-[150px]">
+                  {booking.status === 'result_ready' ? (
+                    <Button className="w-full bg-green-600 hover:bg-green-700">
+                      View Results
+                    </Button>
+                  ) : (
+                    <Button variant="outline" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+                      Cancel
+                    </Button>
+                  )}
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                No completed appointments
-                </h3>
-                <p className="text-gray-600 mt-2">
-                Your past appointments will be listed here once completed.
-                </p>
+              </div>
             </div>
-        </TabsContent>
-        <TabsContent value="canceled" className="mt-6">
-             <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <div className="text-gray-400 mb-4">
-                <CalendarDays className="mx-auto h-12 w-12" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                No canceled appointments
-                </h3>
-                <p className="text-gray-600 mt-2">
-                Your canceled appointments will be shown here.
-                </p>
-            </div>
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

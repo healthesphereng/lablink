@@ -39,7 +39,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         </button>
         <Link href="/home" className="flex items-center gap-2">
           <Image
-            src="/lab-link-logo.jpg"
+            src="/lab-link-logo.png"
             alt="logo"
             width={30}
             height={30}
@@ -79,8 +79,6 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <FirebaseClientProvider>
-      <AppLayoutContent>{children}</AppLayoutContent>
-    </FirebaseClientProvider>
+    <AppLayoutContent>{children}</AppLayoutContent>
   );
 }

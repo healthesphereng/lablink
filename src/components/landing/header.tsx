@@ -24,7 +24,7 @@ export default function Header() {
       <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-black/30 backdrop-blur-lg shadow-lg border-b border-white/10' : 'bg-transparent'}`}>
         <div className="max-w-[1500px] mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/" className="flex gap-2 text-white items-center uppercase font-bold text-secondary z-50">
-            <Image src="/lab-link-logo.jpg" alt="Lab Link Logo" width={50} height={50} className="h-[50px] w-[50px]" />
+            <Image src="/lab-link-logo.png" alt="Lab Link Logo" width={50} height={50} className="h-[50px] w-[50px]" />
             Lab Link
           </Link>
 

@@ -10,6 +10,7 @@ import {
   ChevronRight,
   CircleAlert,
 } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/firebase/provider';
 import Image from 'next/image';
@@ -125,19 +126,22 @@ export default function HomePage() {
                     <p className="text-sm text-gray-500 text-center p-4">Loading results...</p>
                   ) : recentResults.length > 0 ? (
                     recentResults.map((result) => (
-                      <div key={result.id} className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-500 cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-green-100 p-2 rounded-lg">
-                            <FileText className="h-5 w-5 text-green-600" />
+                      <Link href="/results" key={result.id} className="block">
+                        <div className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-500 cursor-pointer transition-colors hover:bg-blue-50">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-green-100 p-2 rounded-lg">
+                              <FileText className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <h1 className="font-medium text-green-600">
+                                {result.labName}
+                              </h1>
+                              <p className="text-sm text-gray-600">{format(result.date.toDate(), 'PPP')}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h1 className="font-medium text-green-600">
-                              {result.labName}
-                            </h1>
-                            <p className="text-sm text-gray-600">{result.date}</p>
-                          </div>
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
                         </div>
-                      </div>
+                      </Link>
                     ))
                   ) : (
                     <p className="text-sm text-gray-500 text-center p-4">No recent results found.</p>
@@ -155,9 +159,25 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-sm text-gray-500 text-center">
-                    No new notifications
-                  </p>
+                  {recentResults.length > 0 ? (
+                    recentResults.slice(0, 3).map((result) => (
+                      <Link href="/results" key={'notif-' + result.id} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                        <div className="bg-blue-100 p-1.5 rounded-full mt-0.5">
+                          <FileText className="h-3 w-3 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">New Result Available</p>
+                          <p className="text-xs text-gray-500">
+                            Your result from {result.labName} is ready to view.
+                          </p>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center">
+                      No new notifications
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

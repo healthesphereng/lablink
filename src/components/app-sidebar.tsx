@@ -3,11 +3,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { LogOut, Beaker } from 'lucide-react';
 import { useFirebase } from '@/firebase/provider';
 import { signOut } from 'firebase/auth';
 
+import { useUserProfile } from '@/hooks/use-user-profile';
+
 const mainNav = [
   { href: '/home', icon: '/home.png', label: 'Home' },
+  { href: '/tests', iconComponent: Beaker, label: 'Browse Tests' },
   { href: '/schedule', icon: '/calendar.png', label: 'Schedule Appointment' },
   { href: '/appointments', icon: '/time.png', label: 'My Appointments' },
   { href: '/results', icon: '/result.png', label: 'Test Results' },
@@ -26,6 +30,7 @@ interface AppSidebarProps {
 export default function AppSidebar({ sidebarOpen, setSidebarOpen }: AppSidebarProps) {
   const router = useRouter();
   const { auth } = useFirebase();
+  const { profile } = useUserProfile();
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -56,7 +61,7 @@ export default function AppSidebar({ sidebarOpen, setSidebarOpen }: AppSidebarPr
       >
         <div className="hidden lg:flex items-center gap-2 p-4 border-b">
           <Image
-            src="/lab-link-logo.jpg"
+            src="/lab-link-logo.png"
             alt="logo"
             width={50}
             height={50}
@@ -75,13 +80,17 @@ export default function AppSidebar({ sidebarOpen, setSidebarOpen }: AppSidebarPr
                   className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <Image
-                    src={item.icon}
-                    alt={item.label}
-                    width={24}
-                    height={24}
-                    className="w-6 h-6"
-                  />
+                  {item.iconComponent ? (
+                    <item.iconComponent className="w-6 h-6" />
+                  ) : (
+                    <Image
+                      src={item.icon!}
+                      alt={item.label}
+                      width={24}
+                      height={24}
+                      className="w-6 h-6"
+                    />
+                  )}
                   <span className="text-sm">{item.label}</span>
                 </Link>
               ))}
@@ -107,6 +116,22 @@ export default function AppSidebar({ sidebarOpen, setSidebarOpen }: AppSidebarPr
                   <span className="text-sm">{item.label}</span>
                 </Link>
               ))}
+              {(profile?.role === 'lab_admin' || profile?.role === 'admin') && (
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Image
+                    src="/dashboard.png"
+                    alt="Lab Terminal"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
+                  <span className="text-sm">Lab Terminal</span>
+                </Link>
+              )}
             </div>
           </div>
           <div className="p-4 border-t">
@@ -114,13 +139,7 @@ export default function AppSidebar({ sidebarOpen, setSidebarOpen }: AppSidebarPr
               onClick={handleLogout}
               className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 hover:bg-primary hover:text-white rounded-lg transition-colors"
             >
-              <Image
-                src="/logout.png"
-                alt="logout"
-                width={20}
-                height={20}
-                className="w-5 h-5"
-              />
+              <LogOut className="w-5 h-5" />
               <span className="text-sm">Logout</span>
             </button>
           </div>

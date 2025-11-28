@@ -12,7 +12,7 @@ import {
   signInWithPopup,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 import { useFirebase } from '@/firebase/provider';
 import { Button } from '@/components/ui/button';
@@ -95,10 +95,30 @@ export function SignUpForm() {
   }, [user, isUserLoading, router]);
 
   const handleGoogleSignIn = async () => {
-    if (!auth) return;
+    if (!auth || !firestore) return;
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userRef = doc(firestore, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // Create user doc if it doesn't exist
+        const names = user.displayName ? user.displayName.split(' ') : ['User'];
+        const firstName = names[0];
+        const lastName = names.length > 1 ? names.slice(1).join(' ') : '';
+
+        await setDoc(userRef, {
+          id: user.uid,
+          email: user.email,
+          firstName: firstName,
+          lastName: lastName,
+          createdAt: new Date().toISOString(),
+          role: 'user' // Default role
+        });
+      }
       // Let the useEffect handle the redirect
     } catch (error: any) {
       setError(error.message);
@@ -168,7 +188,7 @@ export function SignUpForm() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center">
           <Link href="/" className="text-5xl flex flex-col items-center font-bold text-black mb-4">
-            <Image src="/lab-link-logo.jpg" alt="Lab Link Logo" width={80} height={80} className="h-20 w-20" />
+            <Image src="/lab-link-logo.png" alt="Lab Link Logo" width={80} height={80} className="h-20 w-20" />
             <span className="text-3xl">Lab Link</span>
           </Link>
           <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
@@ -226,13 +246,16 @@ export function SignUpForm() {
           </div>
 
         </CardContent>
-        <CardFooter className="text-center justify-center">
+        <CardFooter className="text-center justify-center flex-col gap-2">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link href="/auth/signin" className="font-semibold text-primary hover:underline">
               Sign In
             </Link>
           </p>
+          <Link href="/auth/lab/signin" className="text-sm text-muted-foreground hover:text-primary underline">
+            Lab Partner? Sign in here.
+          </Link>
         </CardFooter>
       </Card>
     </div>

@@ -4,7 +4,6 @@ import FeaturesSection from '@/components/landing/features';
 import ReliableTestingSection from '@/components/landing/reliable-testing';
 import NewsletterFooter from '@/components/landing/newsletter-footer';
 import CallToAction from '@/components/landing/cta';
-import FinalCTA from '@/components/landing/final-cta';
 import Footer from '@/components/landing/footer';
 
 export default function Home() {
@@ -16,7 +15,6 @@ export default function Home() {
         <FeaturesSection />
         <ReliableTestingSection />
         <CallToAction />
-        <FinalCTA />
         <NewsletterFooter />
       </main>
       <Footer />

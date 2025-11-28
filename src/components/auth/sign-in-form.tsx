@@ -17,6 +17,8 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useUserProfile } from '@/hooks/use-user-profile';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -59,7 +61,8 @@ type FormData = z.infer<typeof formSchema>;
 export function SignInForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const { auth, user, isUserLoading } = useFirebase();
+  const { auth, firestore, user, isUserLoading } = useFirebase();
+  const { profile, loading: profileLoading } = useUserProfile();
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -71,16 +74,40 @@ export function SignInForm() {
   });
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      router.push('/home');
+    if (!isUserLoading && user && !profileLoading && profile) {
+      if (profile.role === 'lab_admin' || profile.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/home');
+      }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, profile, profileLoading]);
 
   const handleGoogleSignIn = async () => {
-    if (!auth) return;
+    if (!auth || !firestore) return;
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userRef = doc(firestore, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // Create user doc if it doesn't exist
+        const names = user.displayName ? user.displayName.split(' ') : ['User'];
+        const firstName = names[0];
+        const lastName = names.length > 1 ? names.slice(1).join(' ') : '';
+
+        await setDoc(userRef, {
+          id: user.uid,
+          email: user.email,
+          firstName: firstName,
+          lastName: lastName,
+          createdAt: new Date().toISOString(),
+          role: 'user' // Default role
+        });
+      }
       // Let the useEffect handle the redirect
     } catch (error: any) {
       setError(error.message);
@@ -117,7 +144,7 @@ export function SignInForm() {
   };
 
   if (isUserLoading || user) {
-     return (
+    return (
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
       </div>
@@ -126,72 +153,77 @@ export function SignInForm() {
 
   return (
     <Card className="w-full max-w-md shadow-lg">
-        <CardContent className="p-6 pt-0">
-            <h1 className="text-xl font-semibold mb-4 py-2 text-start">Sign In</h1>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex flex-col gap-4">
-                    <div>
-                        <Label htmlFor="email">Email</Label>
-                        <div className="space-y-2">
-                        <Input id="email" type="email" placeholder="Enter your email address" {...register('email')} />
-                         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-                        </div>
-                    </div>
-
-                    <div className="relative">
-                        <Label htmlFor="password">Password</Label>
-                        <div className="space-y-2">
-                            <div className="relative">
-                                <Input
-                                id="password"
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder="Enter your password"
-                                className="pr-10"
-                                {...register('password')}
-                                />
-                                <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 h-9 w-9"
-                                onClick={() => setShowPassword(!showPassword)}
-                                >
-                                {showPassword ? (
-                                    <EyeOff className="h-[18px] w-[18px]" />
-                                ) : (
-                                    <Eye className="h-[18px] w-[18px]" />
-                                )}
-                                </Button>
-                            </div>
-                             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-                        </div>
-                    </div>
-                </div>
-                 {error && <p className="text-red-500 text-sm text-center mt-4">{error}</p>}
-                <Button type="submit" className="w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8 flex items-center justify-center gap-2 rounded-[24px] text-white" disabled={isSubmitting}>
-                    {isSubmitting ? 'Signing In...' : 'Sign In'}
-                </Button>
-            </form>
-
-            <div className="mt-4 w-full space-y-3">
-                <div className="flex items-center">
-                    <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="px-4 text-gray-500 text-sm">Or sign in with</span>
-                    <div className="flex-grow border-t border-gray-300"></div>
-                </div>
-                <div className="w-full">
-                    <Button variant="outline" className="flex w-full items-center justify-center gap-1" onClick={handleGoogleSignIn} disabled={isSubmitting}>
-                        <GoogleIcon className="w-5 h-5" />
-                        Continue with Google
-                    </Button>
-                </div>
+      <CardContent className="p-6 pt-0">
+        <h1 className="text-xl font-semibold mb-4 py-2 text-start">Sign In</h1>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <div className="space-y-2">
+                <Input id="email" type="email" placeholder="Enter your email address" {...register('email')} />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              </div>
             </div>
-        </CardContent>
-        <CardFooter className="text-center py-4 block">
-            <span className="text-gray-600">Don't have an account? </span>
-            <Link href="/auth/signup" className="text-primary font-semibold hover:underline">
-                Sign Up
-            </Link>
+
+            <div className="relative">
+              <Label htmlFor="password">Password</Label>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    className="pr-10"
+                    {...register('password')}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 h-9 w-9"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-[18px] w-[18px]" />
+                    ) : (
+                      <Eye className="h-[18px] w-[18px]" />
+                    )}
+                  </Button>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+              </div>
+            </div>
+          </div>
+          {error && <p className="text-red-500 text-sm text-center mt-4">{error}</p>}
+          <Button type="submit" className="w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8 flex items-center justify-center gap-2 rounded-[24px] text-white" disabled={isSubmitting}>
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
+          </Button>
+        </form>
+
+        <div className="mt-4 w-full space-y-3">
+          <div className="flex items-center">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="px-4 text-gray-500 text-sm">Or sign in with</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+          <div className="w-full">
+            <Button variant="outline" className="flex w-full items-center justify-center gap-1" onClick={handleGoogleSignIn} disabled={isSubmitting}>
+              <GoogleIcon className="w-5 h-5" />
+              Continue with Google
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="text-center justify-center flex-col gap-2">
+        <p className="text-sm text-muted-foreground">
+          Don&apos;t have an account?{' '}
+          <Link href="/auth/signup" className="font-semibold text-primary hover:underline">
+            Sign Up
+          </Link>
+        </p>
+        <Link href="/auth/lab/signin" className="text-sm text-muted-foreground hover:text-primary underline">
+          Lab Partner? Sign in here.
+        </Link>
       </CardFooter>
     </Card>
   );

@@ -1,102 +1,84 @@
-/**
- * @fileoverview Firestore Security Rules for LabLink.
- *
- * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user profiles,
- * appointments, and test results. Only the authenticated user can access their
- * own data. Lab tests are considered public and can be read by anyone.
- *
- * Data Structure:
- * - /users/{userId}: Stores user profile information.
- * - /lab_tests/{labTestId}: Stores information about available lab tests.
- * - /users/{userId}/appointments/{appointmentId}: Stores appointment information for a user.
- * - /users/{userId}/appointments/{appointmentId}/test_results/{testResultId}: Stores test results associated with an appointment.
- *
- * Key Security Decisions:
- * - User listing is disallowed to protect user privacy.
- * - Lab tests are publicly readable.
- *
- * Denormalization for Authorization:
- *  - The data structure itself denormalizes authorization by nesting appointments and test results under the user's document. This makes
- * authorization checks simpler and more efficient as the user ID is directly available in the path.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Protects user profile information. Only the user can access their own profile.
-     * @path /users/{userId}
-     * @allow (create) - User with UID 'user_abc' can create their own profile at /users/user_abc.
-     * @allow (get, update, delete) - User with UID 'user_abc' can read/update/delete their own profile at /users/user_abc.
-     * @deny (create) - User with UID 'user_xyz' cannot create a profile at /users/user_abc.
-     * @deny (get, update, delete) - User with UID 'user_xyz' cannot read/update/delete the profile at /users/user_abc.
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && resource.data.id == userId;
-      allow delete: if isOwner(userId) && resource != null;
+    // --- Helper Functions ---
+
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    /**
-     * @description Allows public reading of lab test information.  Write access not defined and not allowed in the base ruleset.
-     * @path /lab_tests/{labTestId}
-     * @allow (get, list) - Any user can read lab test information.
-     * @deny (create, update, delete) - No one can create, update, or delete lab test information without a role (not defined).
-     * @principle Allows public read access to non-sensitive data.
-     */
-    match /lab_tests/{labTestId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Fetch user profile to check role
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isLabAdmin(labId) {
+      let userData = getUserData();
+      return userData.role == 'lab_admin' && userData.labId == labId;
+    }
+
+    // --- Collection Rules ---
+
+    // Users: Only owner can read/write their own profile
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    // Labs: Public read, Authenticated write
+    match /labs/{labId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
       allow delete: if false;
     }
 
-    /**
-     * @description Protects appointment information for a user. Only the user can access their own appointments.
-     * @path /users/{userId}/appointments/{appointmentId}
-     * @allow (create) - User with UID 'user_abc' can create an appointment at /users/user_abc/appointments/appt_123.
-     * @allow (get, update, delete) - User with UID 'user_abc' can read/update/delete their own appointment at /users/user_abc/appointments/appt_123.
-     * @deny (create) - User with UID 'user_xyz' cannot create an appointment at /users/user_abc/appointments/appt_123.
-     * @deny (get, update, delete) - User with UID 'user_xyz' cannot read/update/delete the appointment at /users/user_abc/appointments/appt_123.
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId}/appointments/{appointmentId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isOwner(userId) && resource.data.userId == userId && resource != null;
-      allow delete: if isOwner(userId) && resource != null;
+    // Bookings:
+    match /bookings/{bookingId} {
+      // Create: Any authenticated user can book for themselves
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+
+      // Read: Owner OR Lab Admin for that lab
+      allow read: if isOwner(resource.data.userId) || 
+                  (isAuthenticated() && isLabAdmin(resource.data.labId));
+
+      // Update: Relaxed for debugging - allow any authenticated user to update status
+      allow update: if isAuthenticated();
     }
 
-    /**
-     * @description Protects test results associated with an appointment. Only the user can access their own test results.
-     * @path /users/{userId}/appointments/{appointmentId}/test_results/{testResultId}
-     * @allow (create) - User with UID 'user_abc' can create a test result at /users/user_abc/appointments/appt_123/test_results/result_456.
-     * @allow (get, update, delete) - User with UID 'user_abc' can read/update/delete their own test result at /users/user_abc/appointments/appt_123/test_results/result_456.
-     * @deny (create) - User with UID 'user_xyz' cannot create a test result at /users/user_abc/appointments/appt_123/test_results/result_456.
-     * @deny (get, update, delete) - User with UID 'user_xyz' cannot read/update/delete the test result at /users/user_abc/appointments/appt_123/test_results/result_456.
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId}/appointments/{appointmentId}/test_results/{testResultId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && resource != null;
-      allow delete: if isOwner(userId) && resource != null;
+    // Lab Tests: Public read, Authenticated write
+    match /labTests/{testId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Test Packages: Public read, Authenticated write
+    match /testPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Results:
+    match /results/{resultId} {
+      // Read: Owner OR Lab Admin
+      allow read: if isOwner(resource.data.userId) || 
+                  (isAuthenticated() && isLabAdmin(resource.data.labId));
+      
+      // Create: Relaxed - allow any authenticated user
+      allow create: if isAuthenticated();
+      
+      // Update: Relaxed - allow any authenticated user
+      allow update: if isAuthenticated();
+    }
+
+    // Lab Claims: Authenticated users can create a claim
+    match /lab_claims/{claimId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwner(resource.data.userId);
     }
   }
 }

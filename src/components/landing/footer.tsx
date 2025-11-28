@@ -14,7 +14,7 @@ export default function Footer() {
               <h2 className="text-2xl font-bold text-white uppercase">
                 <Link className="flex items-center space-x-2" href="/">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
-                    <Image src="/lab-link-logo.jpg" alt="Company Logo" width={48} height={48} className="w-12 h-12 object-contain" />
+                    <Image src="/lab-link-logo.png" alt="Company Logo" width={48} height={48} className="w-12 h-12 object-contain" />
                   </div>
                   <h1 className="text-xl uppercase hidden lg:flex font-bold text-white hover:text-blue-400 transition-colors">Lab Link</h1>
                 </Link>

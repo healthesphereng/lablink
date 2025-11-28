@@ -1,76 +1,63 @@
 import { useState, useEffect } from 'react';
-import { useFirebase } from '@/firebase/provider';
-import { collection, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit as firestoreLimit } from 'firebase/firestore';
+import { useFirebase, useUser } from '@/firebase/provider';
+import { TestResult } from '@/types';
 
-export interface Result {
-    id: string;
-    labName: string;
-    date: string;
-    tests: string[];
-    downloadUrl: string;
-    userId: string;
-}
+export function useResults(limit?: number) {
+  const { user } = useUser();
+  const { firestore } = useFirebase();
+  const [results, setResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function useResults(limitCount?: number) {
-    const { firestore, user } = useFirebase();
-    const [results, setResults] = useState<Result[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+  useEffect(() => {
+    async function fetchResults() {
+      if (!user || !firestore) {
+        setLoading(false);
+        return;
+      }
 
-    useEffect(() => {
-        async function fetchResults() {
-            if (!firestore || !user) {
-                setLoading(false);
-                return;
-            }
+      try {
+        setLoading(true);
+        const resultsRef = collection(firestore, 'results');
+        let q = query(
+          resultsRef,
+          where('userId', '==', user.uid)
+          // orderBy('date', 'desc') // Removed to avoid index requirement
+        );
 
-            try {
-                setLoading(true);
-                const resultsRef = collection(firestore, 'results');
+        // Limit handled manually if needed, or apply limit after client-side sort if dataset is small
+        // For now, we fetch all for the user (usually not too many)
 
-                // Build query with proper constraint types
-                let q = query(
-                    resultsRef,
-                    where('userId', '==', user.uid),
-                    orderBy('date', 'desc')
-                );
+        const snapshot = await getDocs(q);
+        const fetchedResults = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as TestResult));
 
-                if (limitCount) {
-                    q = query(q, limit(limitCount));
-                }
+        // Sort client-side
+        fetchedResults.sort((a, b) => {
+          // Handle Timestamp objects or strings
+          const dateA = a.date?.toDate ? a.date.toDate().getTime() : new Date(a.date as any).getTime();
+          const dateB = b.date?.toDate ? b.date.toDate().getTime() : new Date(b.date as any).getTime();
+          return dateB - dateA;
+        });
 
-                const querySnapshot = await getDocs(q);
-
-                const fetchedResults: Result[] = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    // Handle date if it's a Timestamp
-                    let dateStr = data.date;
-                    if (data.date instanceof Timestamp) {
-                        dateStr = data.date.toDate().toLocaleDateString();
-                    }
-
-                    fetchedResults.push({
-                        id: doc.id,
-                        labName: data.labName || 'Unknown Lab',
-                        date: dateStr || new Date().toLocaleDateString(),
-                        tests: data.tests || [],
-                        downloadUrl: data.downloadUrl || '#',
-                        userId: data.userId,
-                    });
-                });
-
-                setResults(fetchedResults);
-            } catch (err: any) {
-                console.error('Error fetching results:', err);
-                setError(err);
-            } finally {
-                setLoading(false);
-            }
+        if (limit) {
+          setResults(fetchedResults.slice(0, limit));
+        } else {
+          setResults(fetchedResults);
         }
+      } catch (err) {
+        console.error("Error fetching results:", err);
+        setError("Failed to load results.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-        fetchResults();
-    }, [firestore, user, limitCount]);
+    fetchResults();
+  }, [user, firestore, limit]);
 
-    return { results, loading, error };
+  return { results, loading, error };
 }

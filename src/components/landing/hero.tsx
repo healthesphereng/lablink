@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 
 export default function HeroSection() {
   return (
-    <section className="relative w-full h-screen bg-cover bg-center flex items-center text-white" style={{backgroundImage: "url('/images/lab-sign-in.jpg')"}}>
+    <section className="relative w-full h-screen bg-cover bg-center flex items-center text-white" style={{ backgroundImage: "url('/landing-bg.jpg')" }}>
       <div className="absolute inset-0 bg-black/50"></div>
       <div className="relative max-w-[1500px] px-6 mx-auto w-full flex flex-col lg:items-start items-center text-center lg:text-left">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-3xl drop-shadow-lg">
