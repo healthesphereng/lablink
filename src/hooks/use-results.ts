@@ -31,8 +31,8 @@ export function useResults(limit?: number) {
 
         const snapshot = await getDocs(q);
         const fetchedResults = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          id: doc.id
         } as TestResult));
 
         // Sort client-side

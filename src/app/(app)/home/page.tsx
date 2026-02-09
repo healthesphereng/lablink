@@ -12,18 +12,52 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useUser } from '@/firebase/provider';
+import { useUser, useFirebase } from '@/firebase/provider';
 import Image from 'next/image';
 import { useResults } from '@/hooks/use-results';
+import { useEffect, useState } from 'react';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+
+interface Reminder {
+  id: string;
+  title: string;
+  date: any;
+}
 
 export default function HomePage() {
   const { user } = useUser();
+  const { firestore } = useFirebase();
   const { results: recentResults, loading: loadingResults } = useResults(3);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loadingReminders, setLoadingReminders] = useState(true);
+
+  useEffect(() => {
+    async function fetchReminders() {
+      if (!user || !firestore) return;
+      try {
+        const q = query(
+          collection(firestore, 'reminders'),
+          where('userId', '==', user.uid),
+          orderBy('date', 'asc'),
+          limit(3)
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reminder));
+        setReminders(data);
+      } catch (error) {
+        console.error("Error fetching reminders:", error);
+      } finally {
+        setLoadingReminders(false);
+      }
+    }
+    fetchReminders();
+  }, [user, firestore]);
 
   return (
     <div className="max-w-[1920px] mx-auto p-4 lg:p-6">
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 overflow-y-auto">
+          {/* ... existing content ... */}
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col lg:flex-row gap-4 justify-between items-start mb-6">
@@ -159,6 +193,10 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {/* Reuse recent results as notifications for now, or implement real notifications fetch here if desired. 
+                      Ideally this should fetch from 'notifications' collection too, but strictly speaking user asked for Reminders.
+                      I'll leave this as is (recent results) or we can duplicate logic. 
+                      Let's leave recent results logic here as it was before, to avoid regression. */}
                   {recentResults.length > 0 ? (
                     recentResults.slice(0, 3).map((result) => (
                       <Link href="/results" key={'notif-' + result.id} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
@@ -187,12 +225,28 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <CircleAlert className="text-blue-500 mt-0.5 h-4 w-4" />
-                    <p className="text-sm text-gray-600">
-                      Schedule annual physical examination
-                    </p>
-                  </div>
+                  {loadingReminders ? (
+                    <p className="text-sm text-gray-500">Loading...</p>
+                  ) : reminders.length > 0 ? (
+                    reminders.map(reminder => (
+                      <div key={reminder.id} className="flex items-start gap-2">
+                        <CircleAlert className="text-blue-500 mt-0.5 h-4 w-4 shrink-0" />
+                        <div>
+                          <p className="text-sm text-gray-600 font-medium">
+                            {reminder.title}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {reminder.date?.seconds ? format(new Date(reminder.date.seconds * 1000), 'PPP p') : ''}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No upcoming reminders</p>
+                  )}
+                  <Button asChild variant="link" className="px-0 text-blue-500 text-xs mt-2">
+                    <Link href="/reminders">Manage Reminders</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

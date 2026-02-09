@@ -20,11 +20,11 @@ export default function TestDetailPage() {
     const searchParams = useSearchParams();
     const { firestore } = useFirebase();
     const [test, setTest] = useState<MedicalTest | null>(null);
-    const [labs, setLabs] = useState<Lab[]>([]);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const [selectedLabContext, setSelectedLabContext] = useState<Lab | null>(null);
+
 
     useEffect(() => {
         const fetchTestAndLabs = async () => {
@@ -50,30 +50,7 @@ export default function TestDetailPage() {
             if (foundTest) setTest(foundTest);
             else setError('Test not found');
 
-            // 2. Fetch Lab Context if present
-            const labId = searchParams.get('labId');
-            if (labId && firestore) {
-                try {
-                    const labRef = doc(firestore, 'labs', labId);
-                    const labSnap = await getDoc(labRef);
-                    if (labSnap.exists()) {
-                        setSelectedLabContext({ id: labSnap.id, ...labSnap.data() } as Lab);
-                    }
-                } catch (e) {
-                    console.error("Error fetching lab context", e);
-                }
-            }
 
-            // 3. Fetch Available Labs for this test
-            if (firestore) {
-                try {
-                    const labsRef = collection(firestore, 'labs');
-                    const q = query(labsRef, where('availableTestIds', 'array-contains', testId));
-                    const labsSnap = await getDocs(q);
-                    const labsData = labsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Lab[];
-                    setLabs(labsData);
-                } catch (err) { console.error(err); }
-            }
 
             setLoading(false);
         };
@@ -124,38 +101,9 @@ export default function TestDetailPage() {
                             <p className="text-xl text-gray-600 max-w-3xl">{test.description}</p>
                         </div>
 
-                        {/* Context-Aware Action Card */}
-                        {selectedLabContext ? (
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 min-w-[320px] shadow-sm">
-                                <h3 className="font-semibold text-gray-900 mb-2">Booking with {selectedLabContext.name}</h3>
-                                <p className="text-sm text-gray-600 mb-4">You selected this lab.</p>
-
-                                <div className="space-y-3">
-                                    {selectedLabContext.phone && (
-                                        <Button
-                                            className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg"
-                                            onClick={() => {
-                                                const text = `Hello ${selectedLabContext.name}, I would like to book an appointment for ${test.name}.`;
-                                                window.open(getWhatsAppLink(selectedLabContext.phone!, text), '_blank');
-                                            }}
-                                        >
-                                            <MessageCircle className="mr-2 h-5 w-5" /> Book via WhatsApp
-                                        </Button>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        className="w-full border-blue-600 text-blue-700 hover:bg-blue-50"
-                                        onClick={() => router.push(`/appointments/book?testId=${test.id}&labId=${selectedLabContext.id}`)}
-                                    >
-                                        Book via Platform
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <Button className="py-6 text-lg px-8" onClick={() => router.push(`/find-a-lab?testId=${test.id}`)}>
-                                Book Now
-                            </Button>
-                        )}
+                        <Button className="py-6 text-lg px-8" onClick={() => router.push('/find-a-lab')}>
+                            Find a Lab
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -214,55 +162,18 @@ export default function TestDetailPage() {
                             </ul>
                         </div>
 
-                        {/* Available Labs */}
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                                Available at {labs.length} Lab{labs.length !== 1 ? 's' : ''}
-                            </h2>
-
-                            {labs.length > 0 ? (
-                                <div className="space-y-4">
-                                    {labs.map(lab => (
-                                        <div key={lab.id} className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow">
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{lab.name}</h3>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                        <div className="flex items-center gap-1">
-                                                            <MapPin className="h-4 w-4" />
-                                                            {lab.city}, {lab.state}
-                                                        </div>
-                                                        {lab.rating && (
-                                                            <div className="flex items-center gap-1 text-blue-700 font-medium">
-                                                                <Star className="h-4 w-4 fill-current" />
-                                                                {lab.rating}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-4">
-                                                    <Button variant="outline" onClick={() => router.push(`/appointments/book?testId=${test.id}&labId=${lab.id}`)}>
-                                                        Book Here
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-gray-50 rounded-xl border border-dashed p-8 text-center">
-                                    <p className="text-gray-600 mb-2">No labs currently listed for this specific test.</p>
-                                    <p className="text-sm text-gray-500">
-                                        You can find a lab near you and request this test.
-                                    </p>
-                                    <Link href={`/find-a-lab?testId=${test.id}`}>
-                                        <Button variant="outline" className="mt-4">
-                                            Find a Lab
-                                        </Button>
-                                    </Link>
-                                </div>
-                            )}
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Find a Provider</h2>
+                            <div className="bg-blue-50 rounded-xl border border-blue-100 p-8 text-center">
+                                <p className="text-lg text-gray-700 mb-6">
+                                    Compare prices and locations to find the best lab for your <strong>{test.name}</strong>.
+                                </p>
+                                <Link href="/find-a-lab">
+                                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                                        Find a Lab Near You
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     </div>
 

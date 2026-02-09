@@ -1,6 +1,7 @@
 'use client';
 
 import AppSidebar from '@/components/app-sidebar';
+import AppHeader from '@/components/layout/header';
 import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
@@ -55,8 +56,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main className="flex-1 lg:flex overflow-hidden h-screen pt-14 lg:pt-0 bg-[#F7F8FA]">
-        <div className="flex-1 overflow-y-auto">{children}</div>
+      <main className="flex-1 lg:flex flex-col overflow-hidden h-screen pt-14 lg:pt-0 bg-[#F7F8FA]">
+        <AppHeader />
+        <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-8">{children}</div>
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-50 border-t border-slate-200 p-4 flex justify-between items-center shadow-lg">

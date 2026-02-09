@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { LogOut, Beaker } from 'lucide-react';
+import { LogOut, Beaker, Bell } from 'lucide-react';
 import { useFirebase } from '@/firebase/provider';
 import { signOut } from 'firebase/auth';
 
@@ -13,6 +13,7 @@ const mainNav = [
   { href: '/home', icon: '/home.png', label: 'Home' },
   { href: '/tests', iconComponent: Beaker, label: 'Browse Tests' },
   { href: '/schedule', icon: '/calendar.png', label: 'Schedule Appointment' },
+  { href: '/reminders', iconComponent: Bell, label: 'Health Reminders' },
   { href: '/appointments', icon: '/time.png', label: 'My Appointments' },
   { href: '/results', icon: '/result.png', label: 'Test Results' },
   { href: '/settings', icon: '/settings.png', label: 'Settings' },

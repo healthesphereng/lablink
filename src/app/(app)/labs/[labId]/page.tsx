@@ -217,7 +217,7 @@ export default function LabProfilePage() {
 
             {/* Contact & Actions Section */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
-                <div className="bg-white rounded-xl shadow-lg border p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl shadow-lg border p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-3">
                         <h3 className="font-semibold text-gray-900 border-b pb-2">Contact Direct</h3>
                         <div className="flex gap-2">
@@ -249,32 +249,11 @@ export default function LabProfilePage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                        <h3 className="font-semibold text-gray-900 border-b pb-2">Book Appointment</h3>
-                        <Link href={`/tests?labId=${lab.id}`} className="w-full">
-                            <Button className="w-full text-lg shadow-md bg-blue-700 hover:bg-blue-800">
-                                Browse & Book Tests
-                            </Button>
-                        </Link>
-                    </div>
+
                 </div>
             </div>
 
-            {/* Tests Section Link (Simpler now) */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Available Services</h2>
-                <div className="bg-blue-50 rounded-xl p-8 border border-blue-100 inline-block max-w-2xl w-full">
-                    <Beaker className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                    <p className="text-lg text-gray-700 mb-6">
-                        Explore the full list of medical tests and packages available at <strong>{lab.name}</strong>.
-                    </p>
-                    <Link href={`/tests?labId=${lab.id}`}>
-                        <Button variant="outline" size="lg" className="border-blue-600 text-blue-700 hover:bg-blue-50">
-                            View Full Catalog
-                        </Button>
-                    </Link>
-                </div>
-            </div>
+
         </div>
     );
 }

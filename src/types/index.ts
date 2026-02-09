@@ -77,7 +77,7 @@ export interface TestResult {
     labName: string;
     testName: string;
     date: Timestamp;
-    status: 'normal' | 'abnormal';
+    status: 'normal' | 'abnormal' | 'pending' | 'uploaded' | 'analyzing' | 'analyzed' | 'failed';
     aiSummary: string;
     fileUrl: string;
 }
