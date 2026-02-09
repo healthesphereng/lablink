@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Calendar, Upload, Settings, LogOut, Beaker, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useFirebase } from "@/firebase/provider";
+import { useFirebase } from "@/firebase/FirebaseProvider";
 import { signOut } from "firebase/auth";
 
 const sidebarItems = [

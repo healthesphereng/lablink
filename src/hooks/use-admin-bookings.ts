@@ -8,7 +8,7 @@ export interface AdminBooking {
     userName: string;
     testName: string;
     date: any;
-    status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'result_ready';
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'result_ready' | 'processing';
     price: number;
     labId: string;
     [key: string]: any;

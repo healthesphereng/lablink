@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, CheckCircle, Loader2, Link as LinkIcon } from "lucide-react";
 import { useAdminBookings } from "@/hooks/use-admin-bookings";
-import { useFirebase } from "@/firebase/provider";
+import { useFirebase } from "@/firebase/FirebaseProvider";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, updateDoc, doc, Timestamp } from "firebase/firestore";
 
