@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useFirebase, useUser } from '@/firebase/provider';
+import { useFirebase, useUser } from '@/firebase/FirebaseProvider';
 import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
 import { Booking } from '@/types';
 import { Calendar, Clock, MapPin, Beaker, AlertCircle } from 'lucide-react';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';

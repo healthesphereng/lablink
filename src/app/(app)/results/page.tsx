@@ -10,7 +10,7 @@ import { useResults } from '@/hooks/use-results';
 import { format } from 'date-fns';
 import PDFViewer from '@/components/pdf-viewer';
 import { TestResult } from '@/types';
-import { useFirebase, useStorage, useFirestore } from '@/firebase/provider';
+import { useFirebase, useStorage, useFirestore } from '@/firebase/FirebaseProvider';
 import { ref, uploadBytes, getDownloadURL, uploadBytesResumable, getStorage, uploadString } from 'firebase/storage';
 import { collection, addDoc, serverTimestamp, updateDoc, doc, Timestamp, deleteDoc } from 'firebase/firestore';
 import { deleteObject } from 'firebase/storage';

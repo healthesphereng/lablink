@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { TestPackage, MedicalTest, Lab } from '@/types';
 import { ArrowLeft, CheckCircle2, Info, Package, ShieldCheck } from 'lucide-react';

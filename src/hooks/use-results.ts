@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit as firestoreLimit } from 'firebase/firestore';
-import { useFirebase, useUser } from '@/firebase/provider';
+import { useFirebase, useUser } from '@/firebase/FirebaseProvider';
 import { TestResult } from '@/types';
 
 export function useResults(limit?: number) {

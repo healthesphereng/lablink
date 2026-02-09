@@ -14,7 +14,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { Button } from '@/components/ui/button';
 import {
   Card,

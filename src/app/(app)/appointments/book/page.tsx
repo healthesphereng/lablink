@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useFirebase, useUser } from '@/firebase/provider';
+import { useFirebase, useUser } from '@/firebase/FirebaseProvider';
 import { collection, addDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { Calendar as CalendarIcon, Clock, MapPin, Search, CheckCircle2, Phone } from 'lucide-react';
 import { format } from 'date-fns';

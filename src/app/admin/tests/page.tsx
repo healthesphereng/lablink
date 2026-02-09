@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import { MedicalTest, LabTest } from '@/types';
 import { Button } from '@/components/ui/button';

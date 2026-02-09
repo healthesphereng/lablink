@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { doc, getDoc } from 'firebase/firestore';
 import { Lab, LabTest } from '@/types';
 import { ArrowLeft, MapPin, Phone, Clock, Star, Beaker, MessageCircle } from 'lucide-react';

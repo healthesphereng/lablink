@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { collection, query, where, onSnapshot, updateDoc, doc, orderBy } from 'firebase/firestore';
 import { Bell, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';

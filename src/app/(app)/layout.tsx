@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useUser } from '@/firebase/provider';
+import { useUser } from '@/firebase/FirebaseProvider';
 import { useRouter } from 'next/navigation';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 

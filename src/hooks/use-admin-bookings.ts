@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, query, orderBy, where } from 'firebase/firestore';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { useUserProfile } from '@/hooks/use-user-profile';
 
 export interface AdminBooking {

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useFirebase, useFirestore } from '@/firebase/provider';
+import { useFirebase, useFirestore } from '@/firebase/FirebaseProvider';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc, doc, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

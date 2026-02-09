@@ -5,7 +5,7 @@ import { Users, Calendar, CheckCircle, DollarSign, TrendingUp } from "lucide-rea
 
 import { useEffect, useState } from 'react';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { doc, getDoc } from 'firebase/firestore';
 
 export default function AdminDashboardPage() {

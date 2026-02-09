@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { useFirebase, useUser } from '@/firebase/provider';
+import { useFirebase, useUser } from '@/firebase/FirebaseProvider';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { Lab, LabTest } from '@/types';
 import { Loader2, CheckCircle } from 'lucide-react';

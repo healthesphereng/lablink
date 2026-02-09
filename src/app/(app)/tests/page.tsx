@@ -3,7 +3,7 @@
 import { DEFAULT_TESTS, DEFAULT_PACKAGES } from '@/data/default-tests';
 
 import { useEffect, useState } from 'react';
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase } from '@/firebase/FirebaseProvider';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { MedicalTest, TestPackage } from '@/types';
 import { Search, Beaker, Package, TrendingUp } from 'lucide-react';

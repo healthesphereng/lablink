@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirebase } from '@/firebase/provider';
+import { useUser, useFirebase } from '@/firebase/FirebaseProvider';
 import Image from 'next/image';
 import { useResults } from '@/hooks/use-results';
 import { useEffect, useState } from 'react';
