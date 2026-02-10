@@ -118,10 +118,20 @@ export default function TestsPage() {
             {/* Hero Section */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-4xl font-bold mb-4">Medical Test Catalog</h1>
-                    <p className="text-xl text-blue-100 mb-8">
-                        Browse our comprehensive catalog of medical tests and packages
-                    </p>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <div>
+                            <h1 className="text-4xl font-bold mb-2">Medical Test Catalog</h1>
+                            <p className="text-xl text-blue-100">
+                                Browse our comprehensive catalog of medical tests and packages
+                            </p>
+                        </div>
+                        <Button asChild size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+                            <Link href="/analyze" className="flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5" />
+                                Analyze Lab Results (AI)
+                            </Link>
+                        </Button>
+                    </div>
 
                     {/* Search Bar */}
                     <div className="max-w-2xl">
