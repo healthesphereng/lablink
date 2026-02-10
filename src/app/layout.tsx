@@ -6,6 +6,17 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 export const metadata: Metadata = {
   title: 'LabLink',
   description: 'Trusted lab, accurate & timely results, supporting your health journey.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/lab-link-logo.png',
+    apple: '/lab-link-logo.png',
+  },
+  themeColor: '#ffffff',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({
