@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
         <div className="mt-16 pt-8 border-t border-gray-700/50">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-gray-400">© 2025 Lab Link. All rights reserved.</p>
+            <p className="text-sm text-gray-400">© 2025 Lab Link. All rights reserved. <span className="text-xs ml-2 opacity-50">v1.2.0</span></p>
             <div className="flex space-x-6">
               <Link className="text-sm text-gray-400 hover:text-blue-400 transition-colors" href="/privacy">Privacy Policy</Link>
               <Link className="text-sm text-gray-400 hover:text-blue-400 transition-colors" href="/terms">Terms of Service</Link>
