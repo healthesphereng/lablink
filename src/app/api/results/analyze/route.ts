@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         console.log('Invoking Genkit flow for:', fileUrl.substring(0, 50) + '...');
 
         // Invoke the Genkit flow directly
-        const result = await analyzeLabResultFlow({ image: fileUrl });
+        const result = await analyzeLabResultFlow({ fileUrl: fileUrl });
 
         return NextResponse.json(result);
 

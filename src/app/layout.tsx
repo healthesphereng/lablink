@@ -1,8 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import CookieBanner from '@/components/cookie-banner';
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lablink.vercel.app'), // TODO: Update with actual domain if different
@@ -52,12 +59,6 @@ export const metadata: Metadata = {
   icons: {
     icon: '/lab-link-logo.png',
     apple: '/lab-link-logo.png',
-  },
-  themeColor: '#ffffff',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
   },
 };
 

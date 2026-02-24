@@ -122,16 +122,24 @@ export default function AnalyzePage() {
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                     <Upload className="w-12 h-12 text-gray-400 mb-3" />
                                     <p className="mb-2 text-sm text-gray-500 font-semibold">Click to upload or drag and drop</p>
-                                    <p className="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 5MB)</p>
+                                    <p className="text-xs text-gray-500">PNG, JPG or PDF (MAX. 5MB)</p>
                                 </div>
-                                <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                <input type="file" className="hidden" accept="image/*,application/pdf" onChange={handleFileChange} />
                             </label>
                         ) : (
-                            <div className="relative w-full max-w-md">
-                                <img src={previewUrl} alt="Preview" className="w-full rounded-lg shadow-md border hover:opacity-75 transition-opacity cursor-pointer" onClick={() => { setFile(null); setPreviewUrl(null); setResult(null); }} />
+                            <div className="relative w-full max-w-md border rounded-lg shadow-sm bg-gray-50 flex items-center justify-center p-4">
+                                {file?.type === 'application/pdf' ? (
+                                    <div className="flex flex-col items-center justify-center py-12 text-center text-gray-600 w-full h-64 bg-white border border-gray-200 rounded-lg">
+                                        <FileText className="w-16 h-16 text-red-500 mb-4" />
+                                        <p className="font-medium truncate max-w-[250px]">{file.name}</p>
+                                        <p className="text-xs text-gray-400 mt-1">PDF Selected</p>
+                                    </div>
+                                ) : (
+                                    <img src={previewUrl} alt="Preview" className="w-full max-h-96 object-contain rounded-lg shadow-md border" />
+                                )}
                                 <button
                                     onClick={() => { setFile(null); setPreviewUrl(null); setResult(null); }}
-                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600"
+                                    className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 transition-colors z-10"
                                 >
                                     <span className="sr-only">Remove</span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>

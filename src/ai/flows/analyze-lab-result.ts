@@ -3,9 +3,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// Input Schema: Accepts a base64 string or URL of the image
+// Input Schema: Accepts a base64 string or URL of the image or PDF document.
 const LabResultAnalysisInputSchema = z.object({
-    image: z.string().describe('Base64 encoded image data (data:image/...) or a public URL of the lab result.'),
+    fileUrl: z.string().describe('Public URL or base64 encoded data (data:image/... or data:application/pdf;base64,...) of the lab result.'),
 });
 export type LabResultAnalysisInput = z.infer<typeof LabResultAnalysisInputSchema>;
 
@@ -32,20 +32,19 @@ const labResultAnalysisPrompt = ai.definePrompt({
     name: 'labResultAnalysisPrompt',
     input: { schema: LabResultAnalysisInputSchema },
     output: { schema: LabResultAnalysisOutputSchema },
-    model: 'googleai/gemini-1.5-flash', // Explicitly use 1.5 Flash for cost/speed
     prompt: `
 You are an expert medical lab technician and compassionate health assistant.
-Your task is to analyze the provided image of a medical laboratory result.
+Your task is to analyze the provided medical laboratory result document or image.
 
 Extract the test results accurately and provide a patient-friendly interpretation.
 Focus on explaining what the values mean in simple terms.
-If a result is "High" or "Low" or flagged in the image, strictly mark it as such.
+If a result is "High" or "Low" or flagged in the document, strictly mark it as such.
 If a result is within the reference range, mark it as "Normal".
 
 Structure your advice to be helpful but always include a disclaimer that this is not a substitute for professional medical advice.
 
-Input Image:
-{{media url=image}}
+Input Document/Image:
+{{media url=fileUrl}}
 `,
 });
 
