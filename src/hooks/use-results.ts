@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, limit as firestoreLimit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useFirebase, useUser } from '@/firebase/FirebaseProvider';
 import { TestResult } from '@/types';
 
@@ -11,25 +11,22 @@ export function useResults(limit?: number) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchResults() {
+    let unsubscribe: () => void;
+
+    function subscribeToResults() {
       if (!user || !firestore) {
         setLoading(false);
         return;
       }
 
-      try {
-        setLoading(true);
-        const resultsRef = collection(firestore, 'results');
-        let q = query(
-          resultsRef,
-          where('userId', '==', user.uid)
-          // orderBy('date', 'desc') // Removed to avoid index requirement
-        );
+      setLoading(true);
+      const resultsRef = collection(firestore, 'results');
+      const q = query(
+        resultsRef,
+        where('userId', '==', user.uid)
+      );
 
-        // Limit handled manually if needed, or apply limit after client-side sort if dataset is small
-        // For now, we fetch all for the user (usually not too many)
-
-        const snapshot = await getDocs(q);
+      unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedResults = snapshot.docs.map(doc => ({
           ...doc.data(),
           id: doc.id
@@ -48,15 +45,22 @@ export function useResults(limit?: number) {
         } else {
           setResults(fetchedResults);
         }
-      } catch (err) {
-        console.error("Error fetching results:", err);
-        setError("Failed to load results.");
-      } finally {
+
         setLoading(false);
-      }
+      }, (err) => {
+        console.error("Error fetching results real-time:", err);
+        setError("Failed to load results.");
+        setLoading(false);
+      });
     }
 
-    fetchResults();
+    subscribeToResults();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [user, firestore, limit]);
 
   return { results, loading, error };

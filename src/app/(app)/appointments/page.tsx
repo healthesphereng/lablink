@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useFirebase, useUser } from '@/firebase/FirebaseProvider';
-import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { Booking } from '@/types';
 import { Calendar, Clock, MapPin, Beaker, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function AppointmentsPage() {
   const { firestore } = useFirebase();
   const { user } = useUser();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBookings() {
@@ -39,6 +41,36 @@ export default function AppointmentsPage() {
     fetchBookings();
   }, [firestore, user]);
 
+  const handleCancelAppointment = async (bookingId: string) => {
+    if (!firestore || !bookingId) return;
+
+    if (!window.confirm("Are you sure you want to cancel this appointment?")) {
+      return;
+    }
+
+    setCancellingId(bookingId);
+    try {
+      const bookingRef = doc(firestore, 'bookings', bookingId);
+      await updateDoc(bookingRef, {
+        status: 'cancelled'
+      });
+
+      // Update local state to reflect the cancellation
+      setBookings(prevBookings =>
+        prevBookings.map(booking =>
+          booking.id === bookingId ? { ...booking, status: 'cancelled' } : booking
+        )
+      );
+
+      toast.success("Appointment cancelled successfully.");
+    } catch (error: any) {
+      console.error("Error cancelling appointment:", error);
+      toast.error("Failed to cancel appointment. Please try again.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -63,15 +95,16 @@ export default function AppointmentsPage() {
       ) : (
         <div className="space-y-4">
           {bookings.map((booking) => (
-            <div key={booking.id} className="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-blue-600">
+            <div key={booking.id} className={`bg-white rounded-xl shadow-md overflow-hidden border-l-4 ${booking.status === 'cancelled' ? 'border-gray-300 opacity-75' : 'border-blue-600'}`}>
               <div className="p-6 flex flex-col md:flex-row justify-between gap-6">
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-bold text-gray-900">{booking.testName}</h3>
+                    <h3 className={`text-lg font-bold ${booking.status === 'cancelled' ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{booking.testName}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize
                       ${booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                         booking.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                          'bg-green-100 text-green-800'}`}>
+                          booking.status === 'cancelled' ? 'bg-gray-100 text-gray-600' :
+                            'bg-green-100 text-green-800'}`}>
                       {booking.status.replace('_', ' ')}
                     </span>
                   </div>
@@ -101,9 +134,18 @@ export default function AppointmentsPage() {
                     <Button className="w-full bg-green-600 hover:bg-green-700">
                       View Results
                     </Button>
+                  ) : booking.status === 'cancelled' ? (
+                    <Button disabled variant="outline" className="w-full bg-gray-50 text-gray-400 border-gray-200">
+                      Cancelled
+                    </Button>
                   ) : (
-                    <Button variant="outline" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
-                      Cancel
+                    <Button
+                      variant="outline"
+                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 disabled:opacity-50"
+                      onClick={() => booking.id && handleCancelAppointment(booking.id)}
+                      disabled={cancellingId === booking.id}
+                    >
+                      {cancellingId === booking.id ? 'Cancelling...' : 'Cancel'}
                     </Button>
                   )}
                 </div>

@@ -61,15 +61,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-8">{children}</div>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-50 border-t border-slate-200 p-4 flex justify-between items-center shadow-lg">
-        <div>
-          <p className="font-medium text-slate-800">Install Lab Link App</p>
-          <p className="text-sm text-slate-600">For faster access to your appointments</p>
-        </div>
-        <button className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md transition-colors">
-          Install
-        </button>
-      </div>
+
     </div>
   );
 }
